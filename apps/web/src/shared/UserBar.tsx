@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { NAV_ITEMS } from "./navigation";
 import { mockUtilisateurNomAffiche } from "./mockData";
-import { IconHome } from "./icons";
+import { IconHome, IconParametres } from "./icons";
 
 function initials(name: string) {
   return name
@@ -38,7 +38,7 @@ export function UserBar() {
           end
           title="Accueil"
           className={({ isActive }) =>
-            `flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
+            `flex h-9 w-9 items-center justify-center rounded-md border outline-none transition-colors focus-visible:border-panel-accent/60 focus-visible:bg-panel-accent/15 focus-visible:text-panel-accent ${
               isActive
                 ? "border-panel-accent/60 bg-panel-accent/15 text-panel-accent"
                 : "border-transparent text-panel-muted hover:border-panel-border hover:text-panel-text"
@@ -54,7 +54,7 @@ export function UserBar() {
             to={to}
             title={label}
             className={({ isActive }) =>
-              `flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
+              `flex h-9 w-9 items-center justify-center rounded-md border outline-none transition-colors focus-visible:border-panel-accent/60 focus-visible:bg-panel-accent/15 focus-visible:text-panel-accent ${
                 isActive
                   ? activeClass
                   : "border-transparent text-panel-muted hover:border-panel-border hover:text-panel-text"
@@ -67,10 +67,23 @@ export function UserBar() {
       </nav>
 
       <div className="flex shrink-0 items-center gap-2">
+        <NavLink
+          to="/parametres"
+          title="Paramètres"
+          className={({ isActive }) =>
+            `flex h-9 w-9 items-center justify-center rounded-md border outline-none transition-colors focus-visible:border-panel-accent/60 focus-visible:bg-panel-accent/15 focus-visible:text-panel-accent ${
+              isActive
+                ? "border-panel-accent/60 bg-panel-accent/15 text-panel-accent"
+                : "border-panel-border text-panel-muted hover:text-panel-text"
+            }`
+          }
+        >
+          <IconParametres className="h-4 w-4" />
+        </NavLink>
         <button
           type="button"
           onClick={deconnecter}
-          className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/20"
+          className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 outline-none transition-colors hover:bg-red-500/20 focus-visible:bg-red-500/25"
         >
           Déconnexion
         </button>

@@ -18,7 +18,7 @@ export function StatusBar() {
 
   return (
     <header className="flex h-11 shrink-0 items-center justify-between border-b border-panel-border bg-panel-surface px-4">
-      <NavLink to="/dashboard" className="flex items-center gap-2">
+      <NavLink to="/dashboard" className="flex items-center gap-2 rounded outline-none opacity-90 transition-opacity hover:opacity-100 focus-visible:opacity-100">
         <span className="flex h-6 w-6 items-center justify-center rounded-full border border-panel-accent/40 bg-panel-accent/10 text-panel-accent">
           <IconShield className="h-3.5 w-3.5" />
         </span>

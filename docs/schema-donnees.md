@@ -692,17 +692,21 @@ model StatutOperationnel {
 }
 
 model Unite {
-  id                   String  @id @default(uuid())
+  id                   String   @id @default(uuid())
   tenantId             String
   organismeId          String
   indicatif            String
   statutOperationnelId String
   vehiculeServiceId    String?
+  armementDeclare      String[] // déclaré au niveau de la patrouille, pas par agent (décision 11/08/2026)
   positionSvg          Json?
   positionFiveM        Json?
+  declareParId         String?  // agent auteur de la dernière prise/modification de service
+  declareAt            DateTime?
 
-  equipiers UniteEquipier[]
+  equipiers    UniteEquipier[]
   affectations DispatchAffectation[]
+  operations   OperationUnite[]
 
   @@unique([organismeId, indicatif])
 }
@@ -769,6 +773,43 @@ model DispatchEvenement {
   createdAt DateTime @default(now())
 
   dispatch Dispatch @relation(fields: [dispatchId], references: [id])
+}
+
+enum OperationStatut {
+  PLANIFIEE
+  EN_COURS
+  TERMINEE
+  ANNULEE
+}
+
+// Distincte de Dispatch : une opération est planifiée à l'avance (contrôle ciblé, descente,
+// surveillance...), pas déclenchée par un appel. Une intervention peut naître en marge d'une
+// opération en cours, mais reste un objet séparé (décision 11/08/2026).
+model Operation {
+  id               String          @id @default(uuid())
+  tenantId         String
+  organismeId      String
+  nom              String
+  type             String
+  objectif         String
+  statut           OperationStatut @default(PLANIFIEE)
+  dateDebutPrevue  DateTime
+  dateFinPrevue    DateTime?
+  responsableId    String
+  notes            String?
+  createdAt        DateTime        @default(now())
+
+  unites OperationUnite[]
+}
+
+model OperationUnite {
+  operationId String
+  uniteId     String
+
+  operation Operation @relation(fields: [operationId], references: [id])
+  unite     Unite     @relation(fields: [uniteId], references: [id])
+
+  @@id([operationId, uniteId])
 }
 
 model CarteCalque {

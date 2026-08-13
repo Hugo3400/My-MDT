@@ -181,17 +181,27 @@ export function ParametresPage() {
           title="Préférences de notifications"
         >
           <div className="flex flex-col gap-2 text-sm">
-            {[
-              ["Dispatch prioritaire", notifDispatch, setNotifDispatch],
-              ["BOLO publiés", notifBolo, setNotifBolo],
-              ["Warrants en attente de visa", notifWarrants, setNotifWarrants],
-              ["Rapports en attente d'approbation", notifRapports, setNotifRapports],
-            ].map(([label, checked, setter]) => (
-              <label key={label as string} className="flex items-center gap-2 text-panel-text">
+            {(
+              [
+                { label: "Dispatch prioritaire", checked: notifDispatch, setChecked: setNotifDispatch },
+                { label: "BOLO publiés", checked: notifBolo, setChecked: setNotifBolo },
+                {
+                  label: "Warrants en attente de visa",
+                  checked: notifWarrants,
+                  setChecked: setNotifWarrants,
+                },
+                {
+                  label: "Rapports en attente d'approbation",
+                  checked: notifRapports,
+                  setChecked: setNotifRapports,
+                },
+              ] satisfies { label: string; checked: boolean; setChecked: (v: boolean) => void }[]
+            ).map(({ label, checked, setChecked }) => (
+              <label key={label} className="flex items-center gap-2 text-panel-text">
                 <input
                   type="checkbox"
-                  checked={checked as boolean}
-                  onChange={(e) => (setter as (v: boolean) => void)(e.target.checked)}
+                  checked={checked}
+                  onChange={(e) => setChecked(e.target.checked)}
                   className="h-4 w-4 rounded border-panel-border bg-panel-bg text-panel-accent focus:ring-panel-accent"
                 />
                 {label}

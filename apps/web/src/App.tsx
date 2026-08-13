@@ -2,12 +2,16 @@ import type { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./shared/AuthContext";
 import { AuthProvider } from "./shared/AuthProvider";
+import { PatrouillesProvider } from "./shared/PatrouillesProvider";
 import { AppLayout } from "./shared/AppLayout";
 import { PlaceholderPage } from "./shared/PlaceholderPage";
 import { LoginPage } from "./features/auth/LoginPage";
 import { OrganisationSelectPage } from "./features/auth/OrganisationSelectPage";
 import { SplashScreen } from "./features/auth/SplashScreen";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
+import { ParametresPage } from "./features/parametres/ParametresPage";
+import { DispatchPage } from "./features/dispatch/DispatchPage";
+import { OperationsPage } from "./features/operations/OperationsPage";
 
 function RequireOrganisme({ children }: { children: ReactElement }) {
   const { status } = useAuth();
@@ -38,20 +42,16 @@ function AppRoutes() {
       <Route
         element={
           <RequireOrganisme>
-            <AppLayout />
+            <PatrouillesProvider>
+              <AppLayout />
+            </PatrouillesProvider>
           </RequireOrganisme>
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route
-          path="/dispatch"
-          element={
-            <PlaceholderPage
-              title="Dispatch"
-              description="Écran opérationnel temps réel — liste des interventions, fil d'activité et carte SVG. Prévu en Phase 3."
-            />
-          }
-        />
+        <Route path="/parametres" element={<ParametresPage />} />
+        <Route path="/dispatch" element={<DispatchPage />} />
+        <Route path="/operations" element={<OperationsPage />} />
         <Route
           path="/rapports"
           element={

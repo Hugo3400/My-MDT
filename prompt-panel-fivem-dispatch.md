@@ -74,6 +74,13 @@ Réponses aux questions restantes de la section 8, validées telles que recomman
 - **Q19 — Position live sur la carte** : affichage par défaut limité aux unités en service (statut ≠ hors service) et aux marqueurs saisis, jamais à tous les membres du tenant en permanence. Le partage de position live du joueur FiveM est optionnel et activable par organisme, avec repli sur une position saisie manuellement si désactivé.
 - **Q20 — Carte SVG** : aucun asset exploitable avec droit de revente n'existe actuellement → un brief de création originale est nécessaire. Le brief couvre : style « plan tactique » sobre cohérent avec l'UI sombre (pas de rendu satellite réaliste) ; découpage par juridictions/quartiers RP du monde GTA V avec frontières éditables par organisme et calques activables (routes, bâtiments clés, points d'intérêt, juridictions) ; niveau de détail suffisant pour situer une intervention sans reproduire l'intégralité du fond de carte du jeu, avec système de coordonnées SVG documenté et fonction de conversion vers les coordonnées in-game FiveM.
 
+**Précisions patrouilles / opérations (11/08/2026)**, actées pendant l'implémentation de l'écran dispatch :
+
+- **Vue principale du dispatch = les patrouilles**, pas la liste d'interventions. L'écran par défaut montre qui est en service, avec qui (équipage), dans quel véhicule et avec quel armement ; les interventions et les opérations restent accessibles en onglets secondaires mais liés (une intervention ou une opération s'appuie sur des patrouilles existantes, elle n'en recrée pas).
+- **Armement déclaré au niveau de la patrouille** (`Unite`), pas par agent individuel. Le registre des armes de service (`ArmeService`, section 3.4) reste la source de vérité pour l'inventaire et la traçabilité, mais l'écran dispatch affiche un chargement déclaré par patrouille, plus simple à saisir en RP.
+- **Double déclaration** : un agent peut prendre son propre service (choisir son coéquipier, son véhicule, déclarer son armement) via un flux en libre-service ; un dispatch/superviseur peut à tout moment assigner ou corriger n'importe quelle patrouille depuis son propre écran. Les deux écrivent dans la même entité `Unite`, avec traçabilité de l'auteur du dernier changement.
+- **Opération ≠ Intervention.** Une **intervention** reste réactive : elle naît d'un appel/événement (911, alarme, BOLO croisé), dure le temps de traiter la situation, et correspond à l'écran déjà spécifié en 3.7. Une **opération** est un objet distinct, planifiée à l'avance (contrôle routier ciblé, descente, surveillance), avec un objectif, une ou plusieurs patrouilles assignées, une fenêtre de temps prévue et un statut propre (planifiée, en cours, terminée, annulée) — elle n'est pas rattachée à un appel précis. Une intervention peut naître de façon impromptue « en marge » d'une opération en cours, mais reste un objet séparé avec son propre cycle de vie.
+
 **Dossiers, registres et casier judiciaire**
 
 - **Q21 — Catégories de rapport v1** : arrestation, incident de service, usage de la force, accident/collision, contrôle routier/personne, perquisition, mise en fourrière, rapport d'enquête.
@@ -343,7 +350,7 @@ flowchart TB
 | Multi-client | Tenant, licence, réglages, domaine, intégration Discord, intégration FiveM |
 | Organisation | Organisme, division, spécialité, grade, rôle, permission, membre, affectation |
 | Référentiels RP | Personne, identité synchronisée FiveM, casier judiciaire, condamnation, véhicule civil, véhicule de service, arme, organisation, lieu |
-| Opérationnel | Dispatch, affectation, unité, équipage, statut opérationnel, événement de dispatch |
+| Opérationnel | Dispatch, affectation, unité (patrouille), équipage, armement déclaré, statut opérationnel, événement de dispatch, opération, unité assignée à une opération |
 | Dossiers | Rapport, catégorie, modèle, enquête, pièce à conviction, saisie, chaîne de possession |
 | Recherche | Warrant, personne recherchée, BOLO, accusé de diffusion |
 | Gouvernance | Pièce jointe, notification, journal d'audit, export, feature flag |
