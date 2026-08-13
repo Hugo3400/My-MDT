@@ -131,23 +131,49 @@ function NouvelleOperationForm({
 }
 
 export function OperationsPage() {
-  const { equipages } = useDispatchState();
+  const { equipages, setEquipages } = useDispatchState();
   const [operations, setOperations] = useState<Operation[]>(mockOperations);
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
 
+  function marquerEquipages(nomOperation: string, indicatifs: string[]) {
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        indicatifs.includes(indicatifEquipage(eq)) ? { ...eq, operationLiee: nomOperation } : eq,
+      ),
+    );
+  }
+
+  function demarquerEquipages(nomOperation: string) {
+    setEquipages((prev) =>
+      prev.map((eq) => (eq.operationLiee === nomOperation ? { ...eq, operationLiee: undefined } : eq)),
+    );
+  }
+
   function creerOperation(data: Omit<Operation, "id" | "statut">) {
     setOperations((prev) => [{ id: crypto.randomUUID(), statut: "Planifiée", ...data }, ...prev]);
+    marquerEquipages(data.nom, data.unitesAssignees);
     setFormulaireOuvert(false);
   }
 
   function avancerStatut(id: string) {
     setOperations((prev) =>
-      prev.map((op) => (op.id === id ? { ...op, statut: STATUT_SUIVANT[op.statut] } : op)),
+      prev.map((op) => {
+        if (op.id !== id) return op;
+        const nouveauStatut = STATUT_SUIVANT[op.statut];
+        if (nouveauStatut === "Terminée") demarquerEquipages(op.nom);
+        return { ...op, statut: nouveauStatut };
+      }),
     );
   }
 
   function annulerOperation(id: string) {
-    setOperations((prev) => prev.map((op) => (op.id === id ? { ...op, statut: "Annulée" } : op)));
+    setOperations((prev) =>
+      prev.map((op) => {
+        if (op.id !== id) return op;
+        demarquerEquipages(op.nom);
+        return { ...op, statut: "Annulée" };
+      }),
+    );
   }
 
   return (
