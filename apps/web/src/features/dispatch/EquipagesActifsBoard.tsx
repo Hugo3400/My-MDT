@@ -47,10 +47,12 @@ function CarteEquipage({
   equipage,
   sections,
   onDissoudre,
+  onEditer,
 }: {
   equipage: Equipage;
   sections: SectionRoster[];
   onDissoudre?: (id: string) => void;
+  onEditer?: (equipage: Equipage) => void;
 }) {
   const style = STATUT_EQUIPAGE_STYLE[equipage.statut];
   const engagement = equipage.interventionLiee
@@ -96,15 +98,26 @@ function CarteEquipage({
 
       {engagement && <p className="text-xs font-medium text-orange-400">{engagement}</p>}
 
-      {onDissoudre && (
-        <button
-          type="button"
-          onClick={() => onDissoudre(equipage.id)}
-          className="mt-1 self-start rounded border border-panel-border px-3 py-1.5 text-xs font-medium text-panel-muted outline-none transition-colors hover:border-red-500/40 hover:text-red-400 focus-visible:border-red-500/40 focus-visible:text-red-400"
-        >
-          Dissoudre
-        </button>
-      )}
+      <div className="mt-1 flex gap-2">
+        {onEditer && (
+          <button
+            type="button"
+            onClick={() => onEditer(equipage)}
+            className="self-start rounded border border-panel-border px-3 py-1.5 text-xs font-medium text-panel-muted outline-none transition-colors hover:border-panel-accent/50 hover:text-panel-text focus-visible:border-panel-accent/50 focus-visible:text-panel-text"
+          >
+            Éditer
+          </button>
+        )}
+        {onDissoudre && (
+          <button
+            type="button"
+            onClick={() => onDissoudre(equipage.id)}
+            className="self-start rounded border border-panel-border px-3 py-1.5 text-xs font-medium text-panel-muted outline-none transition-colors hover:border-red-500/40 hover:text-red-400 focus-visible:border-red-500/40 focus-visible:text-red-400"
+          >
+            Dissoudre
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -113,10 +126,12 @@ export function EquipagesActifsBoard({
   equipages,
   sections,
   onDissoudre,
+  onEditer,
 }: {
   equipages: Equipage[];
   sections: SectionRoster[];
   onDissoudre?: (id: string) => void;
+  onEditer?: (equipage: Equipage) => void;
 }): JSX.Element {
   if (equipages.length === 0) {
     return (
@@ -134,6 +149,7 @@ export function EquipagesActifsBoard({
           equipage={equipage}
           sections={sections}
           onDissoudre={onDissoudre}
+          onEditer={onEditer}
         />
       ))}
     </div>

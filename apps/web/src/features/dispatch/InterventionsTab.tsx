@@ -61,7 +61,7 @@ function IntervalCard({
 }
 
 export function InterventionsTab() {
-  const { equipages } = useDispatchState();
+  const { equipages, setEquipages } = useDispatchState();
   const [dispatchs, setDispatchs] = useState<DispatchDetail[]>(mockDispatchsDetail);
   const [selectedId, setSelectedId] = useState(mockDispatchsDetail[0]?.id ?? "");
   const [commentaire, setCommentaire] = useState("");
@@ -87,6 +87,17 @@ export function InterventionsTab() {
     if (!selected || nouveau === selected.statut) return;
     ajouterEvenement(`Statut changé : ${selected.statut} → ${nouveau}`);
     updateSelected((d) => ({ ...d, statut: nouveau }));
+
+    // Une intervention clôturée/annulée libère automatiquement les équipages qui y étaient engagés.
+    if (nouveau === "Clôturé" || nouveau === "Annulé") {
+      setEquipages((prev) =>
+        prev.map((eq) =>
+          eq.interventionLiee === selected.numero
+            ? { ...eq, statut: "Actif", interventionLiee: undefined }
+            : eq,
+        ),
+      );
+    }
   }
 
   function changerPriorite() {
@@ -106,6 +117,14 @@ export function InterventionsTab() {
       ...d,
       unitesEngagees: d.unitesEngagees.filter((u) => u.id !== uniteId),
     }));
+    // Libère l'équipage : il redevient assignable à une autre intervention.
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        indicatifEquipage(eq) === unite.indicatif && eq.interventionLiee === selected.numero
+          ? { ...eq, statut: "Actif", interventionLiee: undefined }
+          : eq,
+      ),
+    );
   }
 
   function assignerUnite(indicatif: string) {
@@ -118,6 +137,14 @@ export function InterventionsTab() {
         { id: crypto.randomUUID(), indicatif, statut: "En route", couleur: "#22c55e" },
       ],
     }));
+    // L'équipage engagé n'est plus disponible pour une autre intervention tant qu'il est ici.
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        indicatifEquipage(eq) === indicatif
+          ? { ...eq, statut: "En intervention", interventionLiee: selected.numero }
+          : eq,
+      ),
+    );
   }
 
   function envoyerCommentaire() {

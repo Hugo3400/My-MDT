@@ -1,40 +1,43 @@
 import { useEffect, useState } from "react";
-import { indicatifEquipage, type Equipage } from "./mockEquipages";
 import type { MembreRoster } from "./mockRoster";
-import { OBJECTIFS_EQUIPAGE, type ObjectifEquipage, type TypeUnite } from "./mockTypesUnite";
+import { OBJECTIFS_EQUIPAGE, type ObjectifEquipage } from "./mockTypesUnite";
+import { indicatifEquipage, type Equipage, type StatutEquipage } from "./mockEquipages";
+
+const STATUTS_EQUIPAGE: StatutEquipage[] = ["Actif", "En intervention", "Hors service"];
 
 function toggleInArray(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export function CreerEquipageModal({
+export function EditerEquipageModal({
   open,
-  onClose,
-  typesUnite,
-  membresEnService,
+  equipage,
+  membresDisponibles,
   vehiculesDisponibles,
-  equipagesExistants,
-  onCreer,
+  onFermer,
+  onEnregistrer,
+  onDissoudre,
 }: {
   open: boolean;
-  onClose: () => void;
-  typesUnite: TypeUnite[];
-  membresEnService: MembreRoster[];
+  equipage: Equipage | null;
+  membresDisponibles: MembreRoster[];
   vehiculesDisponibles: string[];
-  equipagesExistants: Equipage[];
-  onCreer: (data: {
-    typeUnite: TypeUnite;
-    numero: string;
-    membresIds: string[];
-    objectif: ObjectifEquipage;
-    cible: string;
-    equipementLetal: boolean;
-    equipementNonLetal: boolean;
-    vehicule: string | null;
-  }) => void;
+  onFermer: () => void;
+  onEnregistrer: (
+    id: string,
+    data: {
+      membresIds: string[];
+      objectif: ObjectifEquipage;
+      cible: string;
+      equipementLetal: boolean;
+      equipementNonLetal: boolean;
+      vehicule: string | null;
+      statut: StatutEquipage;
+    },
+  ) => void;
+  onDissoudre: (id: string) => void;
 }): JSX.Element | null {
-  const [typeCode, setTypeCode] = useState<string>(typesUnite[0]?.code ?? "");
-  const [numero, setNumero] = useState("");
+  const [statut, setStatut] = useState<StatutEquipage>("Actif");
   const [membresIds, setMembresIds] = useState<string[]>([]);
   const [objectif, setObjectif] = useState<ObjectifEquipage>("Traque");
   const [cible, setCible] = useState("");
@@ -43,57 +46,46 @@ export function CreerEquipageModal({
   const [vehicule, setVehicule] = useState("");
 
   useEffect(() => {
-    if (!open) return;
-    setTypeCode(typesUnite[0]?.code ?? "");
-    setNumero("");
-    setMembresIds([]);
-    setObjectif("Traque");
-    setCible("");
-    setEquipementLetal(false);
-    setEquipementNonLetal(false);
-    setVehicule("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+    if (!open || !equipage) return;
+    setStatut(equipage.statut);
+    setMembresIds(equipage.membresIds);
+    setObjectif(equipage.objectif);
+    setCible(equipage.cible ?? "");
+    setEquipementLetal(equipage.equipementLetal);
+    setEquipementNonLetal(equipage.equipementNonLetal);
+    setVehicule(equipage.vehicule ?? "");
+  }, [open, equipage]);
 
-  if (!open) return null;
+  if (!open || !equipage) return null;
 
-  const typeSelectionne = typesUnite.find((t) => t.code === typeCode) ?? null;
-  const numeroTrim = numero.trim();
-  const equipageEnCollision =
-    typeSelectionne && numeroTrim !== ""
-      ? equipagesExistants.find(
-          (eq) =>
-            indicatifEquipage({ typeUnite: typeSelectionne, numero: numeroTrim }) === indicatifEquipage(eq)
-        )
-      : undefined;
-  const collisionIndicatif = equipageEnCollision
-    ? indicatifEquipage({ typeUnite: typeSelectionne!, numero: numeroTrim })
-    : null;
-  const peutCreer =
-    typeSelectionne !== null && membresIds.length > 0 && numero.trim() !== "" && !collisionIndicatif;
-
-  function creer() {
-    if (!typeSelectionne || membresIds.length === 0 || numero.trim() === "" || collisionIndicatif) return;
-    onCreer({
-      typeUnite: typeSelectionne,
-      numero: numero.trim(),
+  function enregistrer() {
+    if (!equipage) return;
+    onEnregistrer(equipage.id, {
       membresIds,
       objectif,
       cible,
       equipementLetal,
       equipementNonLetal,
       vehicule: vehicule || null,
+      statut,
     });
+    onFermer();
+  }
+
+  function dissoudre() {
+    if (!equipage) return;
+    onDissoudre(equipage.id);
+    onFermer();
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-panel-border bg-panel-surface p-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-panel-text">Créer un équipage</h2>
+          <h2 className="text-sm font-semibold text-panel-text">Modifier {indicatifEquipage(equipage)}</h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={onFermer}
             aria-label="Fermer"
             className="rounded-md px-2 py-1 text-panel-muted outline-none hover:text-panel-text focus-visible:bg-panel-border/60"
           >
@@ -102,54 +94,29 @@ export function CreerEquipageModal({
         </div>
 
         <div className="mt-4">
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-panel-muted">Type</p>
-          <div className="grid grid-cols-3 gap-2">
-            {typesUnite.map((t) => {
-              const actif = t.code === typeCode;
-              return (
-                <button
-                  key={t.code}
-                  type="button"
-                  onClick={() => setTypeCode(t.code)}
-                  className={`rounded-md border px-2 py-2 text-left outline-none focus-visible:bg-panel-accent/20 ${
-                    actif
-                      ? "border-panel-accent bg-panel-accent/15"
-                      : "border-panel-border bg-panel-bg hover:bg-panel-border/40"
-                  }`}
-                >
-                  <span className="block text-xs font-semibold text-panel-text">{t.nom}</span>
-                  <span className="block text-[10px] text-panel-muted">{t.indicatifPhonetique}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-4">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-panel-muted">
-            Numéro
+            Statut
           </label>
-          <input
-            type="text"
-            value={numero}
-            onChange={(e) => setNumero(e.target.value)}
-            placeholder="Ex. 12"
-            className="w-full rounded-md border border-panel-border bg-panel-bg px-3 py-2 text-xs text-panel-text outline-none placeholder:text-panel-muted focus-visible:border-panel-accent"
-          />
-          {collisionIndicatif && (
-            <p className="mt-1 text-xs text-red-400">Un équipage {collisionIndicatif} existe déjà.</p>
-          )}
+          <select
+            value={statut}
+            onChange={(e) => setStatut(e.target.value as StatutEquipage)}
+            className="w-full rounded-md border border-panel-border bg-panel-bg px-3 py-2 text-xs text-panel-text outline-none focus-visible:border-panel-accent"
+          >
+            {STATUTS_EQUIPAGE.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="mt-4">
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-panel-muted">
-            Membres en service
-          </p>
-          {membresEnService.length === 0 ? (
-            <p className="text-xs text-panel-muted">Aucun agent en service.</p>
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-panel-muted">Membres</p>
+          {membresDisponibles.length === 0 ? (
+            <p className="text-xs text-panel-muted">Aucun agent disponible.</p>
           ) : (
             <div className="flex max-h-40 flex-col gap-1 overflow-y-auto rounded-md border border-panel-border bg-panel-bg p-2">
-              {membresEnService.map((m) => (
+              {membresDisponibles.map((m) => (
                 <label
                   key={m.id}
                   className="flex items-center gap-2 rounded px-1.5 py-1 text-xs text-panel-text hover:bg-panel-border/40"
@@ -243,22 +210,30 @@ export function CreerEquipageModal({
           </select>
         </div>
 
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="mt-5 flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-md border border-panel-border px-4 py-2 text-xs font-medium text-panel-text outline-none hover:bg-panel-border/40 focus-visible:bg-panel-border/40"
+            onClick={dissoudre}
+            className="rounded-md border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs font-medium text-red-400 outline-none hover:bg-red-500/20 focus-visible:bg-red-500/20"
           >
-            Annuler
+            Dissoudre l'équipage
           </button>
-          <button
-            type="button"
-            disabled={!peutCreer}
-            onClick={creer}
-            className="rounded-md border border-panel-accent/40 bg-panel-accent/15 px-4 py-2 text-xs font-medium text-panel-text outline-none hover:bg-panel-accent/25 focus-visible:bg-panel-accent/25 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-panel-accent/15"
-          >
-            Créer
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onFermer}
+              className="rounded-md border border-panel-border px-4 py-2 text-xs font-medium text-panel-text outline-none hover:bg-panel-border/40 focus-visible:bg-panel-border/40"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={enregistrer}
+              className="rounded-md border border-panel-accent/40 bg-panel-accent/15 px-4 py-2 text-xs font-medium text-panel-text outline-none hover:bg-panel-accent/25 focus-visible:bg-panel-accent/25"
+            >
+              Enregistrer
+            </button>
+          </div>
         </div>
       </div>
     </div>
