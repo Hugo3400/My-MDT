@@ -115,7 +115,7 @@ export function RapportsListPanel({
           </select>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <div className="flex rounded-md border border-panel-border p-0.5">
+          <div className="flex shrink-0 rounded-md border border-panel-border bg-panel-bg p-0.5">
             <button
               type="button"
               onClick={() => setPortee("tous")}
@@ -138,9 +138,9 @@ export function RapportsListPanel({
           <button
             type="button"
             onClick={() => setFiltresAvancesOuverts((ouvert) => !ouvert)}
-            className="rounded-md px-2 py-1 text-xs font-medium text-panel-muted outline-none transition-colors hover:text-panel-text focus-visible:text-panel-accent"
+            className="shrink-0 rounded-md border border-panel-border px-2.5 py-1 text-xs font-medium text-panel-muted outline-none transition-colors hover:border-panel-accent/50 hover:text-panel-text focus-visible:border-panel-accent focus-visible:text-panel-accent"
           >
-            {filtresAvancesOuverts ? "Masquer les filtres avancés" : "Filtres avancés"}
+            {filtresAvancesOuverts ? "Masquer les filtres" : "Filtres avancés"}
           </button>
         </div>
         {filtresAvancesOuverts && (
