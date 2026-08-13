@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./shared/AuthContext";
 import { AuthProvider } from "./shared/AuthProvider";
-import { PatrouillesProvider } from "./shared/PatrouillesProvider";
+import { DispatchProvider } from "./shared/DispatchProvider";
 import { AppLayout } from "./shared/AppLayout";
 import { PlaceholderPage } from "./shared/PlaceholderPage";
 import { LoginPage } from "./features/auth/LoginPage";
@@ -42,9 +42,9 @@ function AppRoutes() {
       <Route
         element={
           <RequireOrganisme>
-            <PatrouillesProvider>
+            <DispatchProvider>
               <AppLayout />
-            </PatrouillesProvider>
+            </DispatchProvider>
           </RequireOrganisme>
         }
       >

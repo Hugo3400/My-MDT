@@ -48,6 +48,9 @@ export const mockEffectifGlobal: SectionRoster[] = [
   },
 ];
 
+// Correspond à mockUtilisateurNomAffiche (shared/mockData.ts) — l'agent actuellement connecté.
+export const CURRENT_USER_ID = "m1";
+
 export function effectifTotal(sections: SectionRoster[]): number {
   return sections.reduce((total, s) => total + s.membres.length, 0);
 }
