@@ -89,30 +89,52 @@ export function RapportsListPanel({
           className="w-full rounded-md border border-panel-border bg-panel-bg px-3 py-2 text-sm text-panel-text outline-none placeholder:text-panel-muted transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
         />
         <div className="flex gap-2">
-          <select
-            value={categorieId}
-            onChange={(e) => setCategorieId(e.target.value)}
-            className="flex-1 rounded-md border border-panel-border bg-panel-bg px-2 py-1.5 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
-          >
-            <option value="">Toutes les catégories</option>
-            {categories.map((categorie) => (
-              <option key={categorie.id} value={categorie.id}>
-                {categorie.nom}
-              </option>
-            ))}
-          </select>
-          <select
-            value={statut}
-            onChange={(e) => setStatut(e.target.value as RapportStatut | "")}
-            className="flex-1 rounded-md border border-panel-border bg-panel-bg px-2 py-1.5 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
-          >
-            <option value="">Tous les statuts</option>
-            {STATUT_RAPPORT_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex-1">
+            <select
+              value={categorieId}
+              onChange={(e) => setCategorieId(e.target.value)}
+              className="w-full appearance-none rounded-md border border-panel-border bg-panel-bg py-1.5 pl-2 pr-6 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
+            >
+              <option value="">Toutes les catégories</option>
+              {categories.map((categorie) => (
+                <option key={categorie.id} value={categorie.id}>
+                  {categorie.nom}
+                </option>
+              ))}
+            </select>
+            <svg
+              viewBox="0 0 24 24"
+              className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-panel-muted"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div className="relative flex-1">
+            <select
+              value={statut}
+              onChange={(e) => setStatut(e.target.value as RapportStatut | "")}
+              className="w-full appearance-none rounded-md border border-panel-border bg-panel-bg py-1.5 pl-2 pr-6 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
+            >
+              <option value="">Tous les statuts</option>
+              {STATUT_RAPPORT_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <svg
+              viewBox="0 0 24 24"
+              className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-panel-muted"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
         <div className="flex items-center justify-between gap-2">
           <div className="flex shrink-0 rounded-md border border-panel-border bg-panel-bg p-0.5">
@@ -145,18 +167,29 @@ export function RapportsListPanel({
         </div>
         {filtresAvancesOuverts && (
           <div className="flex flex-col gap-2 rounded-md border border-panel-border bg-panel-bg/60 p-2">
-            <select
-              value={auteur}
-              onChange={(e) => setAuteur(e.target.value)}
-              className="w-full rounded-md border border-panel-border bg-panel-bg px-2 py-1.5 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
-            >
-              <option value="">Tous les auteurs</option>
-              {auteurs.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={auteur}
+                onChange={(e) => setAuteur(e.target.value)}
+                className="w-full appearance-none rounded-md border border-panel-border bg-panel-bg py-1.5 pl-2 pr-6 text-xs text-panel-text outline-none transition-colors focus-visible:border-panel-accent focus-visible:bg-panel-surface"
+              >
+                <option value="">Tous les auteurs</option>
+                {auteurs.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+              <svg
+                viewBox="0 0 24 24"
+                className="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-panel-muted"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
             <div className="flex items-center gap-2">
               <label className="flex flex-1 flex-col gap-1 text-[11px] text-panel-muted">
                 Du
