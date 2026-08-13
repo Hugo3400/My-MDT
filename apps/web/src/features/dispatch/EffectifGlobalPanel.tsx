@@ -10,10 +10,14 @@ export function EffectifGlobalPanel({
   sections,
   enServiceIds,
   onTogglePriseDeService,
+  currentUserId,
+  membresAffectesIds,
 }: {
   sections: SectionRoster[];
   enServiceIds: string[];
   onTogglePriseDeService: (membreId: string) => void;
+  currentUserId?: string;
+  membresAffectesIds?: string[];
 }): JSX.Element {
   return (
     <div className="flex h-full w-72 flex-col border-r border-panel-border bg-panel-surface">
