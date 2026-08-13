@@ -92,7 +92,9 @@ export function RapportFormulaire({
   rapportExistant?: Rapport;
   onEnregistrer: (data: {
     categorieId: string;
+    sousCategorieId?: string;
     titre: string;
+    confidentiel: boolean;
     contenu: Record<string, string>;
     liens: LienRapport[];
     pieceJointes: PieceJointeRapport[];
@@ -101,6 +103,8 @@ export function RapportFormulaire({
 }) {
   const [titre, setTitre] = useState(rapportExistant?.titre ?? "");
   const [categorieId, setCategorieId] = useState(rapportExistant?.categorieId ?? categories[0]?.id ?? "");
+  const [sousCategorieId, setSousCategorieId] = useState(rapportExistant?.sousCategorieId ?? "");
+  const [confidentiel, setConfidentiel] = useState(rapportExistant?.confidentiel ?? false);
   const [contenu, setContenu] = useState<Record<string, string>>(rapportExistant?.contenu ?? {});
   const [liens, setLiens] = useState<LienRapport[]>(rapportExistant?.liens ?? []);
   const [pieceJointes, setPieceJointes] = useState<PieceJointeRapport[]>(
@@ -112,6 +116,14 @@ export function RapportFormulaire({
   const [erreur, setErreur] = useState<string | null>(null);
 
   const categorieSelectionnee = categories.find((c) => c.id === categorieId);
+
+  function changerCategorie(nouvelleCategorieId: string) {
+    setCategorieId(nouvelleCategorieId);
+    const nouvelleCategorie = categories.find((c) => c.id === nouvelleCategorieId);
+    setSousCategorieId((prev) =>
+      nouvelleCategorie?.sousCategories?.some((s) => s.id === prev) ? prev : "",
+    );
+  }
 
   function changerChamp(champId: string, valeur: string) {
     setContenu((prev) => ({ ...prev, [champId]: valeur }));
@@ -178,7 +190,15 @@ export function RapportFormulaire({
       return;
     }
     setErreur(null);
-    onEnregistrer({ categorieId, titre: titre.trim(), contenu, liens, pieceJointes });
+    onEnregistrer({
+      categorieId,
+      sousCategorieId: sousCategorieId || undefined,
+      titre: titre.trim(),
+      confidentiel,
+      contenu,
+      liens,
+      pieceJointes,
+    });
   }
 
   return (
@@ -206,12 +226,27 @@ export function RapportFormulaire({
           </div>
 
           <div>
+            <label className="flex items-center gap-2 text-sm text-panel-text">
+              <input
+                type="checkbox"
+                checked={confidentiel}
+                onChange={(e) => setConfidentiel(e.target.checked)}
+                className="h-4 w-4 rounded border-panel-border bg-panel-bg text-panel-accent outline-none focus-visible:border-panel-accent"
+              />
+              Rapport confidentiel
+            </label>
+            <p className="mt-1 text-[11px] text-panel-muted">
+              Le contenu ne sera visible que par les rôles autorisés.
+            </p>
+          </div>
+
+          <div>
             <label className={labelClasses}>
               Catégorie <span className="text-red-400">*</span>
             </label>
             <select
               value={categorieId}
-              onChange={(e) => setCategorieId(e.target.value)}
+              onChange={(e) => changerCategorie(e.target.value)}
               className={inputClasses}
             >
               {categories.map((categorie) => (
@@ -221,6 +256,24 @@ export function RapportFormulaire({
               ))}
             </select>
           </div>
+
+          {categorieSelectionnee?.sousCategories && categorieSelectionnee.sousCategories.length > 0 && (
+            <div>
+              <label className={labelClasses}>Sous-catégorie</label>
+              <select
+                value={sousCategorieId}
+                onChange={(e) => setSousCategorieId(e.target.value)}
+                className={inputClasses}
+              >
+                <option value="">— Aucune sous-catégorie —</option>
+                {categorieSelectionnee.sousCategories.map((sousCategorie) => (
+                  <option key={sousCategorie.id} value={sousCategorie.id}>
+                    {sousCategorie.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {categorieSelectionnee?.champs.map((champ) => (
             <ChampDynamique

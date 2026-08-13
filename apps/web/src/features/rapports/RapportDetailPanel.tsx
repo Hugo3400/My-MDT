@@ -5,6 +5,7 @@ import {
   type CategorieRapport,
   type Rapport,
   type RapportStatut,
+  type SousCategorieRapport,
 } from "./mockRapports";
 
 const BOUTON_BASE = "rounded-md border px-3 py-1.5 text-xs font-medium outline-none transition-colors";
@@ -25,6 +26,8 @@ function Section({ titre, children }: { titre: string; children: JSX.Element }):
 export function RapportDetailPanel({
   rapport,
   categorie,
+  sousCategorie,
+  estAutorisePourConfidentiel = true,
   onChangerStatut,
   onAjouterCommentaire,
   onEditer,
@@ -32,20 +35,36 @@ export function RapportDetailPanel({
 }: {
   rapport: Rapport;
   categorie: CategorieRapport | undefined;
+  sousCategorie?: SousCategorieRapport;
+  estAutorisePourConfidentiel?: boolean;
   onChangerStatut: (statut: RapportStatut) => void;
   onAjouterCommentaire: (texte: string) => void;
   onEditer: () => void;
   onExporter: () => void;
 }): JSX.Element {
   const [texteCommentaire, setTexteCommentaire] = useState("");
+  const [versionsOuvertes, setVersionsOuvertes] = useState<Set<string>>(new Set());
 
   const style = STATUT_RAPPORT_STYLE[rapport.statut];
+  const contenuMasque = rapport.confidentiel && !estAutorisePourConfidentiel;
 
   const envoyerCommentaire = () => {
     const texte = texteCommentaire.trim();
     if (!texte) return;
     onAjouterCommentaire(texte);
     setTexteCommentaire("");
+  };
+
+  const basculerVersion = (id: string) => {
+    setVersionsOuvertes((precedent) => {
+      const suivant = new Set(precedent);
+      if (suivant.has(id)) {
+        suivant.delete(id);
+      } else {
+        suivant.add(id);
+      }
+      return suivant;
+    });
   };
 
   return (
@@ -56,13 +75,23 @@ export function RapportDetailPanel({
             <p className="text-[11px] text-panel-muted">{rapport.numero}</p>
             <h2 className="mt-0.5 text-lg font-bold text-panel-text">{rapport.titre}</h2>
           </div>
-          <span
-            className={`shrink-0 rounded border px-2 py-1 text-xs font-medium ${style.bg} ${style.text} ${style.border}`}
-          >
-            {rapport.statut}
-          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {rapport.confidentiel && (
+              <span className="rounded border border-red-500/30 bg-red-500/15 px-2 py-1 text-xs font-medium text-red-400">
+                🔒 Confidentiel
+              </span>
+            )}
+            <span
+              className={`rounded border px-2 py-1 text-xs font-medium ${style.bg} ${style.text} ${style.border}`}
+            >
+              {rapport.statut}
+            </span>
+          </div>
         </div>
-        <p className="text-xs text-panel-muted">{categorie?.nom ?? "Catégorie inconnue"}</p>
+        <p className="text-xs text-panel-muted">
+          {categorie?.nom ?? "Catégorie inconnue"}
+          {sousCategorie ? ` · ${sousCategorie.nom}` : ""}
+        </p>
       </div>
 
       <div className="flex items-center px-4 pt-4">
@@ -108,89 +137,99 @@ export function RapportDetailPanel({
         </div>
       </div>
 
-      <Section titre="Contenu">
-        {categorie === undefined ? (
-          <p className="text-sm text-panel-muted">Catégorie introuvable</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {categorie.champs.map((champ) => (
-              <div key={champ.id}>
-                <p className="text-[11px] text-panel-muted">{champ.label}</p>
-                <p className="mt-0.5 whitespace-pre-wrap text-sm text-panel-text">
-                  {rapport.contenu[champ.id]?.trim() ? rapport.contenu[champ.id] : "—"}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Section titre="Liens">
-        {rapport.liens.length === 0 ? (
-          <p className="text-sm text-panel-muted">Aucun lien.</p>
-        ) : (
-          <ul className="flex flex-wrap gap-1.5">
-            {rapport.liens.map((lien) => (
-              <li
-                key={lien.id}
-                className="rounded border border-panel-border bg-panel-bg px-2 py-1 text-xs text-panel-text"
-              >
-                <span className="text-panel-muted">{lien.type}</span> · {lien.libelle}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-
-      <Section titre="Pièces jointes">
-        {rapport.pieceJointes.length === 0 ? (
-          <p className="text-sm text-panel-muted">Aucune pièce jointe.</p>
-        ) : (
-          <ul className="flex flex-col gap-1.5">
-            {rapport.pieceJointes.map((piece) => (
-              <li
-                key={piece.id}
-                className="flex items-center justify-between gap-2 rounded border border-panel-border bg-panel-bg px-3 py-2 text-xs"
-              >
-                <span className="truncate text-panel-text">{piece.nom}</span>
-                <span className="shrink-0 text-panel-muted">{piece.taille}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-
-      <Section titre="Commentaires">
-        <div className="flex flex-col gap-3">
-          {rapport.commentaires.length === 0 ? (
-            <p className="text-sm text-panel-muted">Aucun commentaire.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {rapport.commentaires.map((commentaire) => (
-                <li key={commentaire.id} className="rounded border border-panel-border bg-panel-bg p-2.5 text-xs">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium text-panel-text">{commentaire.auteur}</span>
-                    <span className="text-panel-muted">{commentaire.date}</span>
-                  </div>
-                  <p className="mt-1 text-panel-text">{commentaire.texte}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={texteCommentaire}
-              onChange={(e) => setTexteCommentaire(e.target.value)}
-              placeholder="Ajouter un commentaire..."
-              rows={2}
-              className="w-full resize-none rounded-md border border-panel-border bg-panel-bg px-3 py-2 text-sm text-panel-text outline-none transition-colors placeholder:text-panel-muted focus-visible:border-panel-accent focus-visible:bg-panel-surface"
-            />
-            <button type="button" onClick={envoyerCommentaire} className={`${BOUTON_ACCENT} self-end`}>
-              Ajouter
-            </button>
-          </div>
+      {contenuMasque ? (
+        <div className="flex flex-col items-center gap-2 border-b border-panel-border p-8 text-center">
+          <span className="text-2xl">🔒</span>
+          <p className="text-sm font-medium text-panel-text">Contenu confidentiel — accès restreint.</p>
+          <p className="text-xs text-panel-muted">Seuls les rôles autorisés peuvent consulter ce rapport.</p>
         </div>
-      </Section>
+      ) : (
+        <>
+          <Section titre="Contenu">
+            {categorie === undefined ? (
+              <p className="text-sm text-panel-muted">Catégorie introuvable</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {categorie.champs.map((champ) => (
+                  <div key={champ.id}>
+                    <p className="text-[11px] text-panel-muted">{champ.label}</p>
+                    <p className="mt-0.5 whitespace-pre-wrap text-sm text-panel-text">
+                      {rapport.contenu[champ.id]?.trim() ? rapport.contenu[champ.id] : "—"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Section titre="Liens">
+            {rapport.liens.length === 0 ? (
+              <p className="text-sm text-panel-muted">Aucun lien.</p>
+            ) : (
+              <ul className="flex flex-wrap gap-1.5">
+                {rapport.liens.map((lien) => (
+                  <li
+                    key={lien.id}
+                    className="rounded border border-panel-border bg-panel-bg px-2 py-1 text-xs text-panel-text"
+                  >
+                    <span className="text-panel-muted">{lien.type}</span> · {lien.libelle}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+
+          <Section titre="Pièces jointes">
+            {rapport.pieceJointes.length === 0 ? (
+              <p className="text-sm text-panel-muted">Aucune pièce jointe.</p>
+            ) : (
+              <ul className="flex flex-col gap-1.5">
+                {rapport.pieceJointes.map((piece) => (
+                  <li
+                    key={piece.id}
+                    className="flex items-center justify-between gap-2 rounded border border-panel-border bg-panel-bg px-3 py-2 text-xs"
+                  >
+                    <span className="truncate text-panel-text">{piece.nom}</span>
+                    <span className="shrink-0 text-panel-muted">{piece.taille}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Section>
+
+          <Section titre="Commentaires">
+            <div className="flex flex-col gap-3">
+              {rapport.commentaires.length === 0 ? (
+                <p className="text-sm text-panel-muted">Aucun commentaire.</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {rapport.commentaires.map((commentaire) => (
+                    <li key={commentaire.id} className="rounded border border-panel-border bg-panel-bg p-2.5 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-panel-text">{commentaire.auteur}</span>
+                        <span className="text-panel-muted">{commentaire.date}</span>
+                      </div>
+                      <p className="mt-1 text-panel-text">{commentaire.texte}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="flex flex-col gap-2">
+                <textarea
+                  value={texteCommentaire}
+                  onChange={(e) => setTexteCommentaire(e.target.value)}
+                  placeholder="Ajouter un commentaire..."
+                  rows={2}
+                  className="w-full resize-none rounded-md border border-panel-border bg-panel-bg px-3 py-2 text-sm text-panel-text outline-none transition-colors placeholder:text-panel-muted focus-visible:border-panel-accent focus-visible:bg-panel-surface"
+                />
+                <button type="button" onClick={envoyerCommentaire} className={`${BOUTON_ACCENT} self-end`}>
+                  Ajouter
+                </button>
+              </div>
+            </div>
+          </Section>
+        </>
+      )}
 
       <Section titre="Historique des versions">
         {rapport.historique.length === 0 ? (
