@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { NAV_ITEMS } from "../../shared/navigation";
-import { WantedCard } from "../../shared/WantedCard";
-import { mockRecherches } from "../../shared/mockData";
+import { AvisRechercheSection } from "./AvisRechercheSection";
 
 export function DashboardPage() {
   return (
@@ -24,13 +23,8 @@ export function DashboardPage() {
         ))}
       </div>
 
-      <aside className="flex w-full shrink-0 flex-col gap-3 lg:w-80">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-panel-muted">
-          Avis de recherche récents
-        </h2>
-        {mockRecherches.map((personne) => (
-          <WantedCard key={personne.id} personne={personne} />
-        ))}
+      <aside className="w-full shrink-0 lg:w-80">
+        <AvisRechercheSection />
       </aside>
     </div>
   );
