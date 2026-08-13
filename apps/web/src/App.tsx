@@ -4,6 +4,7 @@ import { useAuth } from "./shared/AuthContext";
 import { AuthProvider } from "./shared/AuthProvider";
 import { DispatchProvider } from "./shared/DispatchProvider";
 import { RapportsProvider } from "./shared/RapportsProvider";
+import { MandatsBoloProvider } from "./shared/MandatsBoloProvider";
 import { ToastProvider } from "./shared/ToastProvider";
 import { AppLayout } from "./shared/AppLayout";
 import { PlaceholderPage } from "./shared/PlaceholderPage";
@@ -47,7 +48,9 @@ function AppRoutes() {
           <RequireOrganisme>
             <DispatchProvider>
               <RapportsProvider>
-                <AppLayout />
+                <MandatsBoloProvider>
+                  <AppLayout />
+                </MandatsBoloProvider>
               </RapportsProvider>
             </DispatchProvider>
           </RequireOrganisme>
