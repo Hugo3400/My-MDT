@@ -80,7 +80,7 @@ export function InterventionsTab() {
   function ajouterEvenement(texte: string) {
     updateSelected((d) => ({
       ...d,
-      filActivite: [...d.filActivite, { id: crypto.randomUUID(), heure: heureActuelle(), texte }],
+      filActivite: [...d.filActivite, { id: generateId(), heure: heureActuelle(), texte }],
     }));
   }
 
@@ -135,7 +135,7 @@ export function InterventionsTab() {
       ...d,
       unitesEngagees: [
         ...d.unitesEngagees,
-        { id: crypto.randomUUID(), indicatif, statut: "En route", couleur: "#22c55e" },
+        { id: generateId(), indicatif, statut: "En route", couleur: "#22c55e" },
       ],
     }));
     // L'équipage engagé n'est plus disponible pour une autre intervention tant qu'il est ici.

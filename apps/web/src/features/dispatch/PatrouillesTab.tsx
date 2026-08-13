@@ -9,6 +9,7 @@ import { EnServicePanel } from "./EnServicePanel";
 import { EquipagesActifsBoard } from "./EquipagesActifsBoard";
 import { CreerEquipageModal } from "./CreerEquipageModal";
 import { EditerEquipageModal } from "./EditerEquipageModal";
+import { generateId } from "../../shared/id";
 
 export function PatrouillesTab() {
   const { enServiceIds, setEnServiceIds, equipages, setEquipages } = useDispatchState();
@@ -61,7 +62,7 @@ export function PatrouillesTab() {
     setEquipages((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: generateId(),
         typeUnite: data.typeUnite,
         numero: data.numero,
         membresIds: data.membresIds,
