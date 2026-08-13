@@ -23,20 +23,20 @@ function IntervalCard({
   dispatch,
   selected,
   onSelect,
+  onSupprimer,
 }: {
   dispatch: DispatchDetail;
   selected: boolean;
   onSelect: () => void;
+  onSupprimer: () => void;
 }) {
   const style = PRIORITE_STYLE[dispatch.priorite];
   const sansUnite = dispatch.unitesEngagees.length === 0;
   const enAlerte = sansUnite && dispatch.priorite !== "Normale" && dispatch.statut !== "Clôturé";
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={`w-full rounded-md border-l-4 border-y border-r px-3 py-2 text-left transition-colors ${
+    <div
+      className={`group relative w-full rounded-md border-l-4 border-y border-r text-left transition-colors ${
         style.border
       } ${
         selected
@@ -44,20 +44,33 @@ function IntervalCard({
           : "border-y-panel-border border-r-panel-border bg-panel-bg hover:bg-panel-surface"
       }`}
     >
-      <div className="flex items-center justify-between">
-        <span className={`text-sm font-semibold ${style.text}`}>{dispatch.numero}</span>
-        <span className="text-[11px] text-panel-muted">{dispatch.creeDepuis}</span>
-      </div>
-      <p className="mt-0.5 truncate text-xs text-panel-text">
-        {dispatch.categorie} · {dispatch.unitesEngagees.length} unité
-        {dispatch.unitesEngagees.length > 1 ? "s" : ""}
-      </p>
-      {enAlerte && (
-        <span className="mt-1 inline-block rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-300">
-          ⚠ Aucune unité assignée
-        </span>
-      )}
-    </button>
+      <button type="button" onClick={onSelect} className="w-full px-3 py-2 text-left outline-none">
+        <div className="flex items-center justify-between pr-5">
+          <span className={`text-sm font-semibold ${style.text}`}>{dispatch.numero}</span>
+          <span className="text-[11px] text-panel-muted">{dispatch.creeDepuis}</span>
+        </div>
+        <p className="mt-0.5 truncate pr-5 text-xs text-panel-text">
+          {dispatch.categorie} · {dispatch.unitesEngagees.length} unité
+          {dispatch.unitesEngagees.length > 1 ? "s" : ""}
+        </p>
+        {enAlerte && (
+          <span className="mt-1 inline-block rounded bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-300">
+            ⚠ Aucune unité assignée
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onSupprimer();
+        }}
+        title="Supprimer l'intervention"
+        className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded text-panel-muted opacity-0 outline-none transition-opacity hover:bg-red-500/15 hover:text-red-300 focus-visible:opacity-100 focus-visible:bg-red-500/15 focus-visible:text-red-300 group-hover:opacity-100"
+      >
+        ×
+      </button>
+    </div>
   );
 }
 
@@ -155,6 +168,28 @@ export function InterventionsTab() {
     setCommentaire("");
   }
 
+  function supprimerIntervention(id: string) {
+    const cible = dispatchs.find((d) => d.id === id);
+    if (!cible) return;
+
+    // Libère les équipages encore liés à cette intervention avant de la supprimer.
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        eq.interventionLiee === cible.numero
+          ? { ...eq, statut: "Actif", interventionLiee: undefined }
+          : eq,
+      ),
+    );
+
+    setDispatchs((prev) => {
+      const suivant = prev.filter((d) => d.id !== id);
+      if (id === selectedId) {
+        setSelectedId(suivant[0]?.id ?? "");
+      }
+      return suivant;
+    });
+  }
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       const target = e.target as HTMLElement;
@@ -198,6 +233,7 @@ export function InterventionsTab() {
               dispatch={d}
               selected={d.id === selectedId}
               onSelect={() => setSelectedId(d.id)}
+              onSupprimer={() => supprimerIntervention(d.id)}
             />
           ))}
         </div>
