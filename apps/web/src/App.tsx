@@ -13,6 +13,7 @@ import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { ParametresPage } from "./features/parametres/ParametresPage";
 import { DispatchPage } from "./features/dispatch/DispatchPage";
 import { OperationsPage } from "./features/operations/OperationsPage";
+import { RapportsPage } from "./features/rapports/RapportsPage";
 
 function RequireOrganisme({ children }: { children: ReactElement }) {
   const { status } = useAuth();
@@ -53,15 +54,7 @@ function AppRoutes() {
         <Route path="/parametres" element={<ParametresPage />} />
         <Route path="/dispatch" element={<DispatchPage />} />
         <Route path="/operations" element={<OperationsPage />} />
-        <Route
-          path="/rapports"
-          element={
-            <PlaceholderPage
-              title="Rapports"
-              description="Création et suivi des rapports par catégorie, avec workflow brouillon → soumis → approuvé."
-            />
-          }
-        />
+        <Route path="/rapports" element={<RapportsPage />} />
         <Route
           path="/warrants-bolo"
           element={
