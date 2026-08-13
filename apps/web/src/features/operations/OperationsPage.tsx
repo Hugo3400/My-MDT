@@ -132,8 +132,7 @@ function NouvelleOperationForm({
 }
 
 export function OperationsPage() {
-  const { equipages, setEquipages } = useDispatchState();
-  const [operations, setOperations] = useState<Operation[]>(mockOperations);
+  const { equipages, setEquipages, operations, setOperations } = useDispatchState();
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
 
   function marquerEquipages(nomOperation: string, indicatifs: string[]) {

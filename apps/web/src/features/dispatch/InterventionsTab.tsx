@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   PRIORITE_STYLE,
   STATUT_OPTIONS,
-  mockDispatchsDetail,
   type DispatchDetail,
   type DispatchStatut,
   type Priorite,
@@ -75,9 +74,13 @@ function IntervalCard({
 }
 
 export function InterventionsTab() {
-  const { equipages, setEquipages } = useDispatchState();
-  const [dispatchs, setDispatchs] = useState<DispatchDetail[]>(mockDispatchsDetail);
-  const [selectedId, setSelectedId] = useState(mockDispatchsDetail[0]?.id ?? "");
+  const {
+    equipages,
+    setEquipages,
+    interventions: dispatchs,
+    setInterventions: setDispatchs,
+  } = useDispatchState();
+  const [selectedId, setSelectedId] = useState(dispatchs[0]?.id ?? "");
   const [commentaire, setCommentaire] = useState("");
   const [carteReduite, setCarteReduite] = useState(false);
 
