@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { indicatifEquipage, STATUT_EQUIPAGE_STYLE, type Equipage } from "./mockEquipages";
 import { trouverMembre, type SectionRoster } from "./mockRoster";
 
@@ -48,11 +49,13 @@ function CarteEquipage({
   sections,
   onDissoudre,
   onEditer,
+  onContextMenu,
 }: {
   equipage: Equipage;
   sections: SectionRoster[];
   onDissoudre?: (id: string) => void;
   onEditer?: (equipage: Equipage) => void;
+  onContextMenu?: (e: MouseEvent, equipage: Equipage) => void;
 }) {
   const style = STATUT_EQUIPAGE_STYLE[equipage.statut];
   const engagement = equipage.interventionLiee
@@ -62,7 +65,10 @@ function CarteEquipage({
       : null;
 
   return (
-    <div className={`flex flex-col gap-3 rounded-lg border ${style.border} bg-panel-surface p-4`}>
+    <div
+      onContextMenu={(e) => onContextMenu?.(e, equipage)}
+      className={`flex flex-col gap-3 rounded-lg border ${style.border} bg-panel-surface p-4`}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${style.dot}`} />
@@ -127,11 +133,13 @@ export function EquipagesActifsBoard({
   sections,
   onDissoudre,
   onEditer,
+  onContextMenu,
 }: {
   equipages: Equipage[];
   sections: SectionRoster[];
   onDissoudre?: (id: string) => void;
   onEditer?: (equipage: Equipage) => void;
+  onContextMenu?: (e: MouseEvent, equipage: Equipage) => void;
 }): JSX.Element {
   if (equipages.length === 0) {
     return (
@@ -150,6 +158,7 @@ export function EquipagesActifsBoard({
           sections={sections}
           onDissoudre={onDissoudre}
           onEditer={onEditer}
+          onContextMenu={onContextMenu}
         />
       ))}
     </div>

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./shared/AuthContext";
 import { AuthProvider } from "./shared/AuthProvider";
 import { DispatchProvider } from "./shared/DispatchProvider";
+import { ToastProvider } from "./shared/ToastProvider";
 import { AppLayout } from "./shared/AppLayout";
 import { PlaceholderPage } from "./shared/PlaceholderPage";
 import { LoginPage } from "./features/auth/LoginPage";
@@ -131,8 +132,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ToastProvider>
   );
 }

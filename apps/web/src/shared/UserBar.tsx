@@ -3,6 +3,21 @@ import { useAuth } from "./AuthContext";
 import { NAV_ITEMS } from "./navigation";
 import { mockUtilisateurNomAffiche } from "./mockData";
 import { IconHome, IconParametres } from "./icons";
+import { ExpandableNav, type ExpandableNavItem } from "./ExpandableNav";
+
+const EXPANDABLE_ITEMS: ExpandableNavItem[] = [
+  { type: "link", to: "/dashboard", end: true, label: "Accueil", Icon: IconHome },
+  { type: "separator" },
+  ...NAV_ITEMS.map(
+    ({ to, label, Icon, activeClass }): ExpandableNavItem => ({
+      type: "link",
+      to,
+      label,
+      Icon,
+      activeClass,
+    }),
+  ),
+];
 
 function initials(name: string) {
   return name
@@ -32,39 +47,9 @@ export function UserBar() {
         </div>
       </div>
 
-      <nav className="hidden items-center gap-1 md:flex">
-        <NavLink
-          to="/dashboard"
-          end
-          title="Accueil"
-          className={({ isActive }) =>
-            `flex h-9 w-9 items-center justify-center rounded-md border outline-none transition-colors focus-visible:border-panel-accent/60 focus-visible:bg-panel-accent/15 focus-visible:text-panel-accent ${
-              isActive
-                ? "border-panel-accent/60 bg-panel-accent/15 text-panel-accent"
-                : "border-transparent text-panel-muted hover:border-panel-border hover:text-panel-text"
-            }`
-          }
-        >
-          <IconHome className="h-4 w-4" />
-        </NavLink>
-        <span className="mx-1 h-5 w-px bg-panel-border" aria-hidden="true" />
-        {NAV_ITEMS.map(({ to, label, Icon, activeClass }) => (
-          <NavLink
-            key={to}
-            to={to}
-            title={label}
-            className={({ isActive }) =>
-              `flex h-9 w-9 items-center justify-center rounded-md border outline-none transition-colors focus-visible:border-panel-accent/60 focus-visible:bg-panel-accent/15 focus-visible:text-panel-accent ${
-                isActive
-                  ? activeClass
-                  : "border-transparent text-panel-muted hover:border-panel-border hover:text-panel-text"
-              }`
-            }
-          >
-            <Icon className="h-4 w-4" />
-          </NavLink>
-        ))}
-      </nav>
+      <div className="hidden md:block">
+        <ExpandableNav items={EXPANDABLE_ITEMS} />
+      </div>
 
       <div className="flex shrink-0 items-center gap-2">
         <NavLink

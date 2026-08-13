@@ -2,6 +2,8 @@ import type { TypeUnite, ObjectifEquipage } from "./mockTypesUnite";
 
 export type StatutEquipage = "Actif" | "En intervention" | "Hors service";
 
+export const STATUT_EQUIPAGE_OPTIONS: StatutEquipage[] = ["Actif", "En intervention", "Hors service"];
+
 export type Equipage = {
   id: string;
   typeUnite: TypeUnite;

@@ -1,8 +1,16 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useDispatchState } from "../../shared/dispatchContext";
+import { useToast } from "../../shared/toastContext";
+import { ContextMenu, type ContextMenuItem } from "../../shared/ContextMenu";
 import { mockEffectifGlobal, trouverMembre, CURRENT_USER_ID } from "./mockRoster";
 import { TYPES_UNITE, VEHICULES_DISPONIBLES } from "./mockTypesUnite";
-import type { Equipage } from "./mockEquipages";
+import {
+  indicatifEquipage,
+  STATUT_EQUIPAGE_OPTIONS,
+  type Equipage,
+} from "./mockEquipages";
+import type { DispatchDetail } from "./mockDispatch";
+import type { Operation } from "../operations/mockOperations";
 import { ControlBar } from "./ControlBar";
 import { EffectifGlobalPanel } from "./EffectifGlobalPanel";
 import { EnServicePanel } from "./EnServicePanel";
@@ -11,10 +19,29 @@ import { CreerEquipageModal } from "./CreerEquipageModal";
 import { EditerEquipageModal } from "./EditerEquipageModal";
 import { generateId } from "../../shared/id";
 
+function heureActuelle() {
+  return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+
 export function PatrouillesTab() {
-  const { enServiceIds, setEnServiceIds, equipages, setEquipages } = useDispatchState();
+  const {
+    enServiceIds,
+    setEnServiceIds,
+    equipages,
+    setEquipages,
+    interventions,
+    setInterventions,
+    operations,
+    setOperations,
+  } = useDispatchState();
+  const { addToast } = useToast();
   const [modalCreationOuverte, setModalCreationOuverte] = useState(false);
   const [equipageEnEdition, setEquipageEnEdition] = useState<Equipage | null>(null);
+  const [menuContextuel, setMenuContextuel] = useState<{
+    x: number;
+    y: number;
+    equipage: Equipage;
+  } | null>(null);
 
   const suisEnService = enServiceIds.includes(CURRENT_USER_ID);
   const membresAffectesIds = new Set(equipages.flatMap((eq) => eq.membresIds));
@@ -72,7 +99,7 @@ export function PatrouillesTab() {
         equipementNonLetal: data.equipementNonLetal,
         vehicule: data.vehicule,
         statut: "Actif",
-        creeLe: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+        creeLe: heureActuelle(),
       },
     ]);
     setModalCreationOuverte(false);
@@ -124,6 +151,195 @@ export function PatrouillesTab() {
         .filter((m): m is NonNullable<typeof m> => m !== undefined)
     : [];
 
+  function assignerAIntervention(equipage: Equipage, intervention: DispatchDetail) {
+    const indicatif = indicatifEquipage(equipage);
+    setInterventions((prev) =>
+      prev.map((d) =>
+        d.id === intervention.id
+          ? {
+              ...d,
+              unitesEngagees: [
+                ...d.unitesEngagees,
+                { id: generateId(), indicatif, statut: "En route", couleur: "#22c55e" },
+              ],
+              filActivite: [
+                ...d.filActivite,
+                { id: generateId(), heure: heureActuelle(), texte: `${indicatif} affectée` },
+              ],
+            }
+          : d,
+      ),
+    );
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        eq.id === equipage.id
+          ? { ...eq, statut: "En intervention", interventionLiee: intervention.numero }
+          : eq,
+      ),
+    );
+    addToast(`${indicatif} assigné à l'intervention ${intervention.numero}`, "success");
+  }
+
+  function assignerAOperation(equipage: Equipage, operation: Operation) {
+    const indicatif = indicatifEquipage(equipage);
+    setOperations((prev) =>
+      prev.map((op) =>
+        op.id === operation.id && !op.unitesAssignees.includes(indicatif)
+          ? { ...op, unitesAssignees: [...op.unitesAssignees, indicatif] }
+          : op,
+      ),
+    );
+    setEquipages((prev) =>
+      prev.map((eq) => (eq.id === equipage.id ? { ...eq, operationLiee: operation.nom } : eq)),
+    );
+    addToast(`${indicatif} assigné à l'opération « ${operation.nom} »`, "success");
+  }
+
+  function changerStatutRapide(equipage: Equipage, statut: Equipage["statut"]) {
+    const indicatif = indicatifEquipage(equipage);
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        eq.id === equipage.id
+          ? { ...eq, statut, interventionLiee: statut === "En intervention" ? eq.interventionLiee : undefined }
+          : eq,
+      ),
+    );
+    addToast(`${indicatif} : statut → ${statut}`, "info");
+  }
+
+  function ajouterMembreEquipage(equipage: Equipage, membreId: string) {
+    const membre = trouverMembre(mockEffectifGlobal, membreId);
+    setEquipages((prev) =>
+      prev.map((eq) =>
+        eq.id === equipage.id ? { ...eq, membresIds: [...eq.membresIds, membreId] } : eq,
+      ),
+    );
+    addToast(`${membre?.nom ?? "Agent"} ajouté à ${indicatifEquipage(equipage)}`, "success");
+  }
+
+  function retirerMembreEquipage(equipage: Equipage, membreId: string) {
+    const membre = trouverMembre(mockEffectifGlobal, membreId);
+    setEquipages((prev) =>
+      prev
+        .map((eq) =>
+          eq.id === equipage.id
+            ? { ...eq, membresIds: eq.membresIds.filter((id) => id !== membreId) }
+            : eq,
+        )
+        .filter((eq) => eq.membresIds.length > 0),
+    );
+    addToast(`${membre?.nom ?? "Agent"} retiré de ${indicatifEquipage(equipage)}`, "info");
+  }
+
+  function copierIndicatif(equipage: Equipage) {
+    const indicatif = indicatifEquipage(equipage);
+    navigator.clipboard?.writeText(indicatif);
+    addToast("Indicatif copié", "info");
+  }
+
+  function copierMembres(equipage: Equipage) {
+    const noms = equipage.membresIds
+      .map((id) => trouverMembre(mockEffectifGlobal, id)?.nom)
+      .filter((n): n is string => Boolean(n))
+      .join(", ");
+    navigator.clipboard?.writeText(noms);
+    addToast("Liste des membres copiée", "info");
+  }
+
+  function ouvrirMenuContextuel(e: MouseEvent, equipage: Equipage) {
+    e.preventDefault();
+    setMenuContextuel({ x: e.clientX, y: e.clientY, equipage });
+  }
+
+  function construireMenuItems(equipage: Equipage): ContextMenuItem[] {
+    const interventionsOuvertes = interventions.filter(
+      (d) => d.statut !== "Clôturé" && d.statut !== "Annulé",
+    );
+    const operationsOuvertes = operations.filter(
+      (op) => op.statut === "Planifiée" || op.statut === "En cours",
+    );
+    const membresLibres = enServiceIds
+      .filter((id) => !membresAffectesIds.has(id))
+      .map((id) => trouverMembre(mockEffectifGlobal, id))
+      .filter((m): m is NonNullable<typeof m> => m !== undefined);
+
+    return [
+      {
+        type: "submenu",
+        label: "Assigner à une intervention",
+        disabled: interventionsOuvertes.length === 0,
+        items: interventionsOuvertes.map((d) => ({
+          type: "action",
+          label: `${d.numero} — ${d.categorie}`,
+          onSelect: () => assignerAIntervention(equipage, d),
+        })),
+      },
+      {
+        type: "submenu",
+        label: "Assigner à une opération",
+        disabled: operationsOuvertes.length === 0,
+        items: operationsOuvertes.map((op) => ({
+          type: "action",
+          label: op.nom,
+          onSelect: () => assignerAOperation(equipage, op),
+        })),
+      },
+      {
+        type: "submenu",
+        label: "Changer le statut",
+        items: STATUT_EQUIPAGE_OPTIONS.map((s) => ({
+          type: "action",
+          label: s,
+          disabled: s === equipage.statut,
+          onSelect: () => changerStatutRapide(equipage, s),
+        })),
+      },
+      { type: "separator" },
+      {
+        type: "submenu",
+        label: "Ajouter un membre",
+        disabled: membresLibres.length === 0,
+        items: membresLibres.map((m) => ({
+          type: "action",
+          label: `${m.nom} #${m.matricule}`,
+          onSelect: () => ajouterMembreEquipage(equipage, m.id),
+        })),
+      },
+      {
+        type: "submenu",
+        label: "Retirer un membre",
+        disabled: equipage.membresIds.length === 0,
+        items: equipage.membresIds.map((id) => {
+          const m = trouverMembre(mockEffectifGlobal, id);
+          return {
+            type: "action" as const,
+            label: m ? m.nom : "Agent inconnu",
+            onSelect: () => retirerMembreEquipage(equipage, id),
+          };
+        }),
+      },
+      { type: "separator" },
+      { type: "action", label: "Copier l'indicatif", onSelect: () => copierIndicatif(equipage) },
+      {
+        type: "action",
+        label: "Copier la liste des membres",
+        disabled: equipage.membresIds.length === 0,
+        onSelect: () => copierMembres(equipage),
+      },
+      { type: "separator" },
+      { type: "action", label: "Éditer", onSelect: () => setEquipageEnEdition(equipage) },
+      {
+        type: "action",
+        label: "Dissoudre",
+        danger: true,
+        onSelect: () => {
+          dissoudreEquipage(equipage.id);
+          addToast(`${indicatifEquipage(equipage)} dissous`, "info");
+        },
+      },
+    ];
+  }
+
   return (
     <div className="flex h-full flex-col gap-3">
       <ControlBar
@@ -147,6 +363,7 @@ export function PatrouillesTab() {
             sections={mockEffectifGlobal}
             onDissoudre={dissoudreEquipage}
             onEditer={setEquipageEnEdition}
+            onContextMenu={ouvrirMenuContextuel}
           />
         </div>
 
@@ -172,6 +389,15 @@ export function PatrouillesTab() {
         onEnregistrer={enregistrerEquipage}
         onDissoudre={dissoudreEquipage}
       />
+
+      {menuContextuel && (
+        <ContextMenu
+          x={menuContextuel.x}
+          y={menuContextuel.y}
+          items={construireMenuItems(menuContextuel.equipage)}
+          onClose={() => setMenuContextuel(null)}
+        />
+      )}
     </div>
   );
 }
