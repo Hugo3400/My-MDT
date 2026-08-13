@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   OPERATION_STATUT_STYLE,
   TYPES_OPERATION,
-  mockOperations,
   type Operation,
   type OperationStatut,
 } from "./mockOperations";
