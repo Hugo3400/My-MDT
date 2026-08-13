@@ -236,15 +236,47 @@ export function RapportDetailPanel({
           <p className="text-sm text-panel-muted">Aucun historique.</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
-            {rapport.historique.map((version) => (
-              <li key={version.id} className="flex items-start justify-between gap-2 text-xs">
-                <div className="flex flex-col">
-                  <span className="text-panel-text">{version.resume}</span>
-                  <span className="text-panel-muted">{version.auteur}</span>
-                </div>
-                <span className="shrink-0 whitespace-nowrap text-panel-muted">{version.date}</span>
-              </li>
-            ))}
+            {rapport.historique.map((version) => {
+              const ouverte = versionsOuvertes.has(version.id);
+              const cles = Object.keys(version.contenuSnapshot);
+              return (
+                <li key={version.id} className="rounded border border-panel-border bg-panel-bg text-xs">
+                  <button
+                    type="button"
+                    onClick={() => basculerVersion(version.id)}
+                    disabled={contenuMasque}
+                    className="flex w-full items-start justify-between gap-2 px-2.5 py-2 text-left outline-none transition-colors focus-visible:bg-panel-surface disabled:cursor-not-allowed"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-panel-text">{version.resume}</span>
+                      <span className="text-panel-muted">{version.auteur}</span>
+                    </div>
+                    <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-panel-muted">
+                      {version.date}
+                      {!contenuMasque && <span>{ouverte ? "▲" : "▼"}</span>}
+                    </span>
+                  </button>
+                  {!contenuMasque && ouverte && (
+                    <div className="flex flex-col gap-2 border-t border-panel-border px-2.5 py-2">
+                      {cles.length === 0 ? (
+                        <p className="text-panel-muted">Aucune donnée enregistrée pour cette version.</p>
+                      ) : (
+                        cles.map((cle) => (
+                          <div key={cle}>
+                            <p className="text-[11px] text-panel-muted">
+                              {categorie?.champs.find((c) => c.id === cle)?.label ?? cle}
+                            </p>
+                            <p className="mt-0.5 whitespace-pre-wrap text-panel-text">
+                              {version.contenuSnapshot[cle]?.trim() ? version.contenuSnapshot[cle] : "—"}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </Section>
