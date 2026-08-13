@@ -6,8 +6,8 @@ import {
   type Operation,
   type OperationStatut,
 } from "./mockOperations";
-import type { Patrouille } from "../dispatch/mockPatrouilles";
-import { usePatrouilles } from "../../shared/patrouillesContext";
+import { indicatifEquipage, type Equipage } from "../dispatch/mockEquipages";
+import { useDispatchState } from "../../shared/dispatchContext";
 import { mockUtilisateurNomAffiche } from "../../shared/mockData";
 
 const STATUT_SUIVANT: Record<OperationStatut, OperationStatut> = {
@@ -18,11 +18,11 @@ const STATUT_SUIVANT: Record<OperationStatut, OperationStatut> = {
 };
 
 function NouvelleOperationForm({
-  patrouilles,
+  equipages,
   onCreer,
   onFermer,
 }: {
-  patrouilles: Patrouille[];
+  equipages: Equipage[];
   onCreer: (op: Omit<Operation, "id" | "statut">) => void;
   onFermer: () => void;
 }) {
@@ -83,25 +83,28 @@ function NouvelleOperationForm({
           />
         </label>
         <div>
-          <p className="mb-1 text-xs text-panel-muted">Patrouilles assignées</p>
+          <p className="mb-1 text-xs text-panel-muted">Équipages assignés</p>
           <div className="flex flex-wrap gap-2">
-            {patrouilles.map((p) => (
-              <label key={p.id} className="flex items-center gap-1.5 text-xs text-panel-text">
-                <input
-                  type="checkbox"
-                  checked={unitesAssignees.includes(p.indicatif)}
-                  onChange={() =>
-                    setUnitesAssignees((prev) =>
-                      prev.includes(p.indicatif)
-                        ? prev.filter((v) => v !== p.indicatif)
-                        : [...prev, p.indicatif],
-                    )
-                  }
-                  className="h-3.5 w-3.5 rounded border-panel-border bg-panel-bg text-panel-accent"
-                />
-                {p.indicatif}
-              </label>
-            ))}
+            {equipages.map((eq) => {
+              const indicatif = indicatifEquipage(eq);
+              return (
+                <label key={eq.id} className="flex items-center gap-1.5 text-xs text-panel-text">
+                  <input
+                    type="checkbox"
+                    checked={unitesAssignees.includes(indicatif)}
+                    onChange={() =>
+                      setUnitesAssignees((prev) =>
+                        prev.includes(indicatif)
+                          ? prev.filter((v) => v !== indicatif)
+                          : [...prev, indicatif],
+                      )
+                    }
+                    className="h-3.5 w-3.5 rounded border-panel-border bg-panel-bg text-panel-accent"
+                  />
+                  {indicatif}
+                </label>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -128,7 +131,7 @@ function NouvelleOperationForm({
 }
 
 export function OperationsPage() {
-  const { patrouilles } = usePatrouilles();
+  const { equipages } = useDispatchState();
   const [operations, setOperations] = useState<Operation[]>(mockOperations);
   const [formulaireOuvert, setFormulaireOuvert] = useState(false);
 
@@ -169,7 +172,7 @@ export function OperationsPage() {
 
       {formulaireOuvert && (
         <NouvelleOperationForm
-          patrouilles={patrouilles}
+          equipages={equipages}
           onCreer={creerOperation}
           onFermer={() => setFormulaireOuvert(false)}
         />

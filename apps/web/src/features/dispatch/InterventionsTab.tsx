@@ -7,7 +7,8 @@ import {
   type DispatchStatut,
   type Priorite,
 } from "./mockDispatch";
-import type { Patrouille } from "./mockPatrouilles";
+import { indicatifEquipage } from "./mockEquipages";
+import { useDispatchState } from "../../shared/dispatchContext";
 import { mockUtilisateurNomAffiche } from "../../shared/mockData";
 import { IconCarte } from "../../shared/icons";
 
@@ -59,7 +60,8 @@ function IntervalCard({
   );
 }
 
-export function InterventionsTab({ patrouilles }: { patrouilles: Patrouille[] }) {
+export function InterventionsTab() {
+  const { equipages } = useDispatchState();
   const [dispatchs, setDispatchs] = useState<DispatchDetail[]>(mockDispatchsDetail);
   const [selectedId, setSelectedId] = useState(mockDispatchsDetail[0]?.id ?? "");
   const [commentaire, setCommentaire] = useState("");
@@ -137,12 +139,12 @@ export function InterventionsTab({ patrouilles }: { patrouilles: Patrouille[] })
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [dispatchs, selectedId]);
 
-  // Une intervention ne peut mobiliser qu'une patrouille réellement en service et disponible
-  // (voir décision « les interventions s'appuient sur des patrouilles existantes »).
-  const unitesDisponibles = patrouilles.filter(
-    (p) =>
-      p.statut === "Disponible" &&
-      !selected?.unitesEngagees.some((eng) => eng.indicatif === p.indicatif),
+  // Une intervention ne peut mobiliser qu'un équipage réellement actif et disponible
+  // (voir décision « les interventions s'appuient sur des patrouilles/équipages existants »).
+  const unitesDisponibles = equipages.filter(
+    (eq) =>
+      eq.statut === "Actif" &&
+      !selected?.unitesEngagees.some((eng) => eng.indicatif === indicatifEquipage(eq)),
   );
 
   const cloture = selected?.statut === "Clôturé" || selected?.statut === "Annulé";
@@ -251,14 +253,14 @@ export function InterventionsTab({ patrouilles }: { patrouilles: Patrouille[] })
             </ul>
             {unitesDisponibles.length > 0 ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {unitesDisponibles.map((p) => (
+                {unitesDisponibles.map((eq) => (
                   <button
-                    key={p.id}
+                    key={eq.id}
                     type="button"
-                    onClick={() => assignerUnite(p.indicatif)}
+                    onClick={() => assignerUnite(indicatifEquipage(eq))}
                     className="rounded border border-panel-border px-2 py-1 text-[11px] text-panel-muted hover:border-panel-accent/50 hover:text-panel-text"
                   >
-                    + Assigner {p.indicatif}
+                    + Assigner {indicatifEquipage(eq)}
                   </button>
                 ))}
               </div>

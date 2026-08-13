@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { usePatrouilles } from "../../shared/patrouillesContext";
 import { PatrouillesTab } from "./PatrouillesTab";
 import { InterventionsTab } from "./InterventionsTab";
 
@@ -12,7 +11,6 @@ const ONGLETS: { id: Onglet; label: string }[] = [
 
 export function DispatchPage() {
   const [onglet, setOnglet] = useState<Onglet>("patrouilles");
-  const { patrouilles, setPatrouilles } = usePatrouilles();
 
   return (
     <div className="flex h-[calc(100vh-9.5rem)] flex-col gap-3">
@@ -34,10 +32,8 @@ export function DispatchPage() {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {onglet === "patrouilles" && (
-          <PatrouillesTab patrouilles={patrouilles} setPatrouilles={setPatrouilles} />
-        )}
-        {onglet === "interventions" && <InterventionsTab patrouilles={patrouilles} />}
+        {onglet === "patrouilles" && <PatrouillesTab />}
+        {onglet === "interventions" && <InterventionsTab />}
       </div>
     </div>
   );

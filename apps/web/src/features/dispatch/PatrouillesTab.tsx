@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useDispatchState } from "../../shared/dispatchContext";
 import { mockEffectifGlobal, trouverMembre, CURRENT_USER_ID } from "./mockRoster";
-import { TYPES_UNITE, VEHICULES_DISPONIBLES } from "./mockTypesUnite";
+import {
+  TYPES_UNITE,
+  VEHICULES_DISPONIBLES,
+  type ObjectifEquipage,
+  type TypeUnite,
+} from "./mockTypesUnite";
 import { ControlBar } from "./ControlBar";
 import { EffectifGlobalPanel } from "./EffectifGlobalPanel";
 import { EnServicePanel } from "./EnServicePanel";
@@ -31,10 +36,10 @@ export function PatrouillesTab() {
     .filter((m): m is NonNullable<typeof m> => m !== undefined);
 
   function creerEquipage(data: {
-    typeUnite: (typeof TYPES_UNITE)[number];
+    typeUnite: TypeUnite;
     numero: string;
     membresIds: string[];
-    objectif: import("./mockTypesUnite").ObjectifEquipage;
+    objectif: ObjectifEquipage;
     cible: string;
     equipementLetal: boolean;
     equipementNonLetal: boolean;
