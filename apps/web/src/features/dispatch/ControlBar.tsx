@@ -109,8 +109,8 @@ export function ControlBar({
     <div className="w-full border-b border-panel-border bg-panel-surface">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-panel-border px-4 py-2">
         <div className="flex items-center gap-2">
-          <BoutonDeroulantDecoratif libelle="Global Control" />
-          <BoutonDeroulantDecoratif libelle="Global Supervisor" />
+          <BoutonDeroulantDecoratif libelle="Supervisor Control" />
+          <BoutonDeroulantDecoratif libelle="AST Supervisor Control" />
         </div>
 
         <button
