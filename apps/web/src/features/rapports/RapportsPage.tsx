@@ -1,21 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RapportsListPanel } from "./RapportsListPanel";
 import { RapportFormulaire } from "./RapportFormulaire";
 import { RapportDetailPanel } from "./RapportDetailPanel";
+import { RapportImpression } from "./RapportImpression";
 import {
   CATEGORIES_RAPPORT,
-  mockRapports,
+  genererNumeroRapport,
   trouverCategorie,
+  trouverSousCategorie,
   type LienRapport,
   type PieceJointeRapport,
   type Rapport,
   type RapportStatut,
 } from "./mockRapports";
 import { mockUtilisateurNomAffiche } from "../../shared/mockData";
+import { useAuth } from "../../shared/AuthContext";
 import { useToast } from "../../shared/toastContext";
+import { useRapportsState } from "../../shared/rapportsContext";
 import { generateId } from "../../shared/id";
-
-const STORAGE_KEY = "panel:rapports-session";
 
 function heureActuelle() {
   return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
@@ -25,31 +27,24 @@ function dateHeureActuelle() {
   return `${new Date().toLocaleDateString("fr-FR")} ${heureActuelle()}`;
 }
 
-function lireRapportsPersistes(): Rapport[] | null {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 type Mode = "detail" | "creation" | "edition";
 
 export function RapportsPage() {
   const { addToast } = useToast();
-  const [rapports, setRapports] = useState<Rapport[]>(() => lireRapportsPersistes() ?? mockRapports);
+  const { organismeActif } = useAuth();
+  const { rapports, setRapports } = useRapportsState();
   const [selectedId, setSelectedId] = useState<string | null>(rapports[0]?.id ?? null);
   const [mode, setMode] = useState<Mode>("detail");
-
-  useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(rapports));
-  }, [rapports]);
+  const [impressionOuverte, setImpressionOuverte] = useState(false);
 
   const rapportSelectionne = rapports.find((r) => r.id === selectedId) ?? null;
   const categorieSelectionnee = rapportSelectionne
     ? trouverCategorie(rapportSelectionne.categorieId)
     : undefined;
+  const sousCategorieSelectionnee = trouverSousCategorie(
+    categorieSelectionnee,
+    rapportSelectionne?.sousCategorieId,
+  );
 
   function selectionner(id: string) {
     setSelectedId(id);
@@ -70,7 +65,9 @@ export function RapportsPage() {
 
   function enregistrerFormulaire(data: {
     categorieId: string;
+    sousCategorieId?: string;
     titre: string;
+    confidentiel: boolean;
     contenu: Record<string, string>;
     liens: LienRapport[];
     pieceJointes: PieceJointeRapport[];
@@ -78,10 +75,12 @@ export function RapportsPage() {
     if (mode === "creation") {
       const nouveau: Rapport = {
         id: generateId(),
-        numero: `RAP-2026-${String(Math.floor(Math.random() * 900 + 100))}`,
+        numero: genererNumeroRapport(data.categorieId, rapports),
         categorieId: data.categorieId,
+        sousCategorieId: data.sousCategorieId,
         titre: data.titre,
         statut: "Brouillon",
+        confidentiel: data.confidentiel,
         auteur: mockUtilisateurNomAffiche,
         createdAt: dateHeureActuelle(),
         updatedAt: dateHeureActuelle(),
@@ -90,7 +89,13 @@ export function RapportsPage() {
         pieceJointes: data.pieceJointes,
         commentaires: [],
         historique: [
-          { id: generateId(), date: dateHeureActuelle(), auteur: mockUtilisateurNomAffiche, resume: "Création du rapport" },
+          {
+            id: generateId(),
+            date: dateHeureActuelle(),
+            auteur: mockUtilisateurNomAffiche,
+            resume: "Création du rapport",
+            contenuSnapshot: data.contenu,
+          },
         ],
       };
       setRapports((prev) => [nouveau, ...prev]);
@@ -104,7 +109,9 @@ export function RapportsPage() {
             ? {
                 ...r,
                 categorieId: data.categorieId,
+                sousCategorieId: data.sousCategorieId,
                 titre: data.titre,
+                confidentiel: data.confidentiel,
                 contenu: data.contenu,
                 liens: data.liens,
                 pieceJointes: data.pieceJointes,
@@ -117,6 +124,7 @@ export function RapportsPage() {
                     date: dateHeureActuelle(),
                     auteur: mockUtilisateurNomAffiche,
                     resume: remisEnSoumission ? "Corrigé et resoumis" : "Modification du rapport",
+                    contenuSnapshot: data.contenu,
                   },
                 ],
               }
@@ -145,6 +153,7 @@ export function RapportsPage() {
                   date: dateHeureActuelle(),
                   auteur: mockUtilisateurNomAffiche,
                   resume: `Statut changé : ${r.statut} → ${statut}`,
+                  contenuSnapshot: r.contenu,
                 },
               ],
             }
@@ -172,10 +181,6 @@ export function RapportsPage() {
     );
   }
 
-  function exporter() {
-    addToast("Export PDF indisponible dans cet aperçu — prévu selon le gabarit de l'organisme.", "info");
-  }
-
   return (
     <div className="grid h-full grid-cols-1 gap-3 lg:grid-cols-[320px_1fr]">
       <div className="min-h-0 rounded-lg border border-panel-border bg-panel-surface">
@@ -185,6 +190,7 @@ export function RapportsPage() {
           selectedId={selectedId}
           onSelect={selectionner}
           onNouveauRapport={ouvrirCreation}
+          currentUser={mockUtilisateurNomAffiche}
         />
       </div>
 
@@ -202,10 +208,12 @@ export function RapportsPage() {
           <RapportDetailPanel
             rapport={rapportSelectionne}
             categorie={categorieSelectionnee}
+            sousCategorie={sousCategorieSelectionnee}
+            estAutorisePourConfidentiel
             onChangerStatut={changerStatut}
             onAjouterCommentaire={ajouterCommentaire}
             onEditer={ouvrirEdition}
-            onExporter={exporter}
+            onExporter={() => setImpressionOuverte(true)}
           />
         ) : (
           <div className="flex h-full items-center justify-center rounded-lg border border-panel-border bg-panel-surface text-sm text-panel-muted">
@@ -213,6 +221,16 @@ export function RapportsPage() {
           </div>
         )}
       </div>
+
+      {impressionOuverte && rapportSelectionne && (
+        <RapportImpression
+          rapport={rapportSelectionne}
+          categorie={categorieSelectionnee}
+          sousCategorie={sousCategorieSelectionnee}
+          organismeNom={organismeActif?.organismeNom ?? "Organisme"}
+          onFermer={() => setImpressionOuverte(false)}
+        />
+      )}
     </div>
   );
 }
