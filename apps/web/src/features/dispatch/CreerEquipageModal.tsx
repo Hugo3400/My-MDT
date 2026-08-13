@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { indicatifEquipage, type Equipage } from "./mockEquipages";
-import type { MembreRoster } from "./mockRoster";
+import { CURRENT_USER_ID, type MembreRoster } from "./mockRoster";
 import { OBJECTIFS_EQUIPAGE, type ObjectifEquipage, type TypeUnite } from "./mockTypesUnite";
 
 function toggleInArray(list: string[], value: string): string[] {
@@ -162,6 +162,11 @@ export function CreerEquipageModal({
                   />
                   <span>{m.nom}</span>
                   <span className="text-panel-muted">#{m.matricule}</span>
+                  {m.id === CURRENT_USER_ID && (
+                    <span className="rounded bg-panel-accent/20 px-1 text-[10px] font-medium text-panel-accent">
+                      Vous
+                    </span>
+                  )}
                 </label>
               ))}
             </div>
