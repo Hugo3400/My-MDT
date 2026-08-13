@@ -9,6 +9,7 @@ import {
 import { indicatifEquipage, type Equipage } from "../dispatch/mockEquipages";
 import { useDispatchState } from "../../shared/dispatchContext";
 import { mockUtilisateurNomAffiche } from "../../shared/mockData";
+import { generateId } from "../../shared/id";
 
 const STATUT_SUIVANT: Record<OperationStatut, OperationStatut> = {
   Planifiée: "En cours",
@@ -150,7 +151,7 @@ export function OperationsPage() {
   }
 
   function creerOperation(data: Omit<Operation, "id" | "statut">) {
-    setOperations((prev) => [{ id: crypto.randomUUID(), statut: "Planifiée", ...data }, ...prev]);
+    setOperations((prev) => [{ id: generateId(), statut: "Planifiée", ...data }, ...prev]);
     marquerEquipages(data.nom, data.unitesAssignees);
     setFormulaireOuvert(false);
   }

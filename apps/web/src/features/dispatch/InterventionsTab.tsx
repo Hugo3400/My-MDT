@@ -11,6 +11,7 @@ import { indicatifEquipage } from "./mockEquipages";
 import { useDispatchState } from "../../shared/dispatchContext";
 import { mockUtilisateurNomAffiche } from "../../shared/mockData";
 import { IconCarte } from "../../shared/icons";
+import { generateId } from "../../shared/id";
 
 const PRIORITE_CYCLE: Priorite[] = ["Normale", "Urgente", "Critique"];
 
