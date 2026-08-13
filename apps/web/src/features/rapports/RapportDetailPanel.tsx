@@ -238,7 +238,7 @@ export function RapportDetailPanel({
           <ul className="flex flex-col gap-1.5">
             {rapport.historique.map((version) => {
               const ouverte = versionsOuvertes.has(version.id);
-              const cles = Object.keys(version.contenuSnapshot);
+              const cles = Object.keys(version.contenuSnapshot ?? {});
               return (
                 <li key={version.id} className="rounded border border-panel-border bg-panel-bg text-xs">
                   <button

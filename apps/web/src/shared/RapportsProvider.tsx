@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { mockRapports, type Rapport } from "../features/rapports/mockRapports";
 import { RapportsContext, type RapportsContextValue } from "./rapportsContext";
 
-const STORAGE_KEY = "panel:rapports-session";
+// v2 : le format Rapport a changé (confidentiel, sousCategorieId, contenuSnapshot dans l'historique) —
+// une nouvelle clé évite de recharger une session persistée dans l'ancien format et de faire planter l'UI.
+const STORAGE_KEY = "panel:rapports-session:v2";
 
 function lireRapportsPersistes(): Rapport[] | null {
   try {
