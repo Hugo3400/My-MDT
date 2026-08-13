@@ -13,37 +13,37 @@ export const mockEffectifGlobal: SectionRoster[] = [
   {
     titre: "District Leadership",
     membres: [
-      { id: "m30", nom: "Calahan Robert", matricule: 30 },
-      { id: "m84", nom: "Espinoza Adrián", matricule: 84 },
-      { id: "m101", nom: "Simcoe Dominic Graves", matricule: 101 },
+      { id: "m12", nom: "Harrington Wade", matricule: 12 },
+      { id: "m45", nom: "Boucher Élise", matricule: 45 },
+      { id: "m88", nom: "Falkner Desmond", matricule: 88 },
     ],
   },
   {
     titre: "Supervisory Staff",
     membres: [
-      { id: "m77", nom: "Calahan Kayce", matricule: 77 },
-      { id: "m73", nom: "Crowford Rango", matricule: 73 },
-      { id: "m59", nom: "Dean Walker Robert", matricule: 59 },
-      { id: "m102", nom: "Derand John Washington", matricule: 102 },
-      { id: "m109", nom: "Ramirez Alexander", matricule: 109 },
-      { id: "m10", nom: "Washington Clark W.", matricule: 10 },
+      { id: "m33", nom: "Whitlock Renée", matricule: 33 },
+      { id: "m67", nom: "Castellan Théo", matricule: 67 },
+      { id: "m52", nom: "Ortiz Marcus", matricule: 52 },
+      { id: "m91", nom: "Beaumont Julien", matricule: 91 },
+      { id: "m28", nom: "Sorensen Ingrid", matricule: 28 },
+      { id: "m76", nom: "Talbot Owen", matricule: 76 },
     ],
   },
   {
     titre: "Senior Deputy",
     membres: [
-      { id: "m51", nom: "James Max", matricule: 51 },
-      { id: "m99", nom: "Mori Tatsuya", matricule: 99 },
+      { id: "m15", nom: "Nakamura Kenji", matricule: 15 },
+      { id: "m60", nom: "Fontaine Camille", matricule: 60 },
     ],
   },
   {
     titre: "Special Deputy",
     membres: [
-      { id: "m19", nom: "Reynolds Asher", matricule: 19 },
-      { id: "m47", nom: "Markovitch Arnold Mickael James", matricule: 47 },
-      { id: "m92", nom: "Kareem Ali", matricule: 92 },
-      { id: "m95", nom: "Cross Alex", matricule: 95 },
-      { id: "m1", nom: "Stones Isaiah", matricule: 1 },
+      { id: "m1", nom: "Caldwell Ethan", matricule: 1 },
+      { id: "m23", nom: "Vasquez Diego", matricule: 23 },
+      { id: "m84", nom: "Whitmore Grace", matricule: 84 },
+      { id: "m39", nom: "Adeyemi Tomi", matricule: 39 },
+      { id: "m56", nom: "Larsson Freya", matricule: 56 },
     ],
   },
 ];

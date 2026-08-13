@@ -2,7 +2,7 @@
 
 // Nom affiché de l'utilisateur connecté (ex. displayName Discord), distinct de l'identité
 // RP civile (Personne) synchronisée depuis FiveM — voir décision Q12.
-export const mockUtilisateurNomAffiche = "Isaiah Stones";
+export const mockUtilisateurNomAffiche = "Ethan Caldwell";
 
 export type Affectation = {
   id: string;

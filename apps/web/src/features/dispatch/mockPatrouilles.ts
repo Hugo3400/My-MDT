@@ -59,12 +59,12 @@ export const mockPatrouilles: Patrouille[] = [
   {
     id: "p1",
     indicatif: "1-Adam-12",
-    membres: ["Isaiah Stones"],
+    membres: ["Ethan Caldwell"],
     vehicule: "Vapid Stanier — Unité 4",
     armement: ["Pistolet de service"],
     statut: "Disponible",
     depuis: "14:02",
-    declarePar: "Isaiah Stones",
+    declarePar: "Ethan Caldwell",
   },
   {
     id: "p2",
