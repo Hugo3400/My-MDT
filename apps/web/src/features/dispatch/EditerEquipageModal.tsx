@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { MembreRoster } from "./mockRoster";
+import { CURRENT_USER_ID, type MembreRoster } from "./mockRoster";
 import { OBJECTIFS_EQUIPAGE, type ObjectifEquipage } from "./mockTypesUnite";
 import { indicatifEquipage, type Equipage, type StatutEquipage } from "./mockEquipages";
 
@@ -129,6 +129,11 @@ export function EditerEquipageModal({
                   />
                   <span>{m.nom}</span>
                   <span className="text-panel-muted">#{m.matricule}</span>
+                  {m.id === CURRENT_USER_ID && (
+                    <span className="rounded bg-panel-accent/20 px-1 text-[10px] font-medium text-panel-accent">
+                      Vous
+                    </span>
+                  )}
                 </label>
               ))}
             </div>
